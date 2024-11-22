@@ -116,6 +116,8 @@ runs:
           fi
         }
 
+        env
+
         set -x
         if [[ "${{ inputs.module }}" == "." ]]; then
           # set some sane defaults for the current module

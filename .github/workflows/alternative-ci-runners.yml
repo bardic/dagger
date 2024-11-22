@@ -17,24 +17,43 @@ jobs:
     uses: ./.github/workflows/_dagger_on_depot_remote_engine.yml
     with:
       function: docs lint
-
-  test-cli-engine-on-depot-remote-engine:
-    needs: docs-lint-on-depot-remote-engine
-    uses: ./.github/workflows/_dagger_on_depot_remote_engine.yml
+  docs-lint-on-depot-local-engine:
+    uses: ./.github/workflows/_dagger_on_depot_local_engine.yml
     with:
-      function: test specific --run='TestCLI|TestEngine' --race=true --parallel=16
+      function: docs lint
+  docs-lint-on-namespace-remote-engine:
+    uses: ./.github/workflows/_dagger_on_namespace_remote_engine.yml
+    with:
+      function: docs lint
       timeout: 20
+  docs-lint-on-namespace-local-engine:
+    uses: ./.github/workflows/_dagger_on_namespace_local_engine.yml
+    with:
+      function: docs lint
+      timeout: 20
+      dev: true
 
   sdk-go-on-depot-remote-engine:
     needs: docs-lint-on-depot-remote-engine
     uses: ./.github/workflows/_dagger_on_depot_remote_engine.yml
     with:
       function: check --targets=sdk/go
+  sdk-go-on-namespace-remote-engine:
+    needs: docs-lint-on-namespace-remote-engine
+    uses: ./.github/workflows/_dagger_on_namespace_remote_engine.yml
+    with:
+      function: check --targets=sdk/go
   sdk-go-dev-on-depot-local-engine:
+    needs: sdk-go-on-depot-remote-engine
     uses: ./.github/workflows/_dagger_on_depot_local_engine.yml
     with:
       function: check --targets=sdk/go
-      size: 4
+      dev: true
+  sdk-go-dev-on-namespace-local-engine:
+    needs: sdk-go-on-namespace-remote-engine
+    uses: ./.github/workflows/_dagger_on_namespace_local_engine.yml
+    with:
+      function: check --targets=sdk/go
       dev: true
 
   sdk-python-on-depot-remote-engine:
@@ -42,11 +61,22 @@ jobs:
     uses: ./.github/workflows/_dagger_on_depot_remote_engine.yml
     with:
       function: check --targets=sdk/python
+  sdk-python-on-namespace-remote-engine:
+    needs: docs-lint-on-namespace-remote-engine
+    uses: ./.github/workflows/_dagger_on_namespace_remote_engine.yml
+    with:
+      function: check --targets=sdk/python
   sdk-python-dev-on-depot-local-engine:
+    needs: sdk-python-on-depot-remote-engine
     uses: ./.github/workflows/_dagger_on_depot_local_engine.yml
     with:
       function: check --targets=sdk/python
-      size: 8
+      dev: true
+  sdk-python-dev-on-namespace-local-engine:
+    needs: sdk-python-on-namespace-remote-engine
+    uses: ./.github/workflows/_dagger_on_namespace_local_engine.yml
+    with:
+      function: check --targets=sdk/python
       dev: true
 
   sdk-typescript-on-depot-remote-engine:
@@ -54,9 +84,20 @@ jobs:
     uses: ./.github/workflows/_dagger_on_depot_remote_engine.yml
     with:
       function: check --targets=sdk/typescript
+  sdk-typescript-on-namespace-remote-engine:
+    needs: docs-lint-on-namespace-remote-engine
+    uses: ./.github/workflows/_dagger_on_namespace_remote_engine.yml
+    with:
+      function: check --targets=sdk/typescript
   sdk-typescript-dev-on-depot-local-engine:
+    needs: sdk-typescript-on-depot-remote-engine
     uses: ./.github/workflows/_dagger_on_depot_local_engine.yml
     with:
       function: check --targets=sdk/typescript
-      size: 8
+      dev: true
+  sdk-typescript-dev-on-namespace-local-engine:
+    needs: sdk-typescript-on-namespace-remote-engine
+    uses: ./.github/workflows/_dagger_on_namespace_local_engine.yml
+    with:
+      function: check --targets=sdk/typescript
       dev: true
