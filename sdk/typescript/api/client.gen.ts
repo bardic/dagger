@@ -627,6 +627,13 @@ export type DirectoryAsModuleOpts = {
   engineVersion?: string
 }
 
+export type DirectoryCreateFileOpts = {
+  /**
+   * Permission for the file (e.g., 0600).
+   */
+  permissions?: number
+}
+
 export type DirectoryDockerBuildOpts = {
   /**
    * The platform to build.
@@ -3299,6 +3306,29 @@ export class Directory extends BaseClient {
         {
           operation: "asModule",
           args: { ...opts },
+        },
+      ],
+      ctx: this._ctx,
+    })
+  }
+
+  /**
+   * Creates a new file with the given contents.
+   * @param path Name of the file to create (e.g., "file.txt").
+   * @param contents Content of the file (e.g., "Hello world!").
+   * @param opts.permissions Permission for the file (e.g., 0600).
+   */
+  createFile = (
+    path: string,
+    contents: string,
+    opts?: DirectoryCreateFileOpts,
+  ): File => {
+    return new File({
+      queryTree: [
+        ...this._queryTree,
+        {
+          operation: "createFile",
+          args: { path, contents, ...opts },
         },
       ],
       ctx: this._ctx,

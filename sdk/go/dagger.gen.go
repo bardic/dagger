@@ -2136,6 +2136,29 @@ func (r *Directory) AsModule(opts ...DirectoryAsModuleOpts) *Module {
 	}
 }
 
+// DirectoryCreateFileOpts contains options for Directory.CreateFile
+type DirectoryCreateFileOpts struct {
+	// Permission for the file (e.g., 0600).
+	Permissions int
+}
+
+// Creates a new file with the given contents.
+func (r *Directory) CreateFile(path string, contents string, opts ...DirectoryCreateFileOpts) *File {
+	q := r.query.Select("createFile")
+	for i := len(opts) - 1; i >= 0; i-- {
+		// `permissions` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Permissions) {
+			q = q.Arg("permissions", opts[i].Permissions)
+		}
+	}
+	q = q.Arg("path", path)
+	q = q.Arg("contents", contents)
+
+	return &File{
+		query: q,
+	}
+}
+
 // Gets the difference between this directory and an another directory.
 func (r *Directory) Diff(other *Directory) *Directory {
 	assertNotNil("other", other)

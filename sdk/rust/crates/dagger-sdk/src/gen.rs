@@ -3915,6 +3915,12 @@ pub struct DirectoryAsModuleOpts<'a> {
     pub source_root_path: Option<&'a str>,
 }
 #[derive(Builder, Debug, PartialEq)]
+pub struct DirectoryCreateFileOpts {
+    /// Permission for the file (e.g., 0600).
+    #[builder(setter(into, strip_option), default)]
+    pub permissions: Option<isize>,
+}
+#[derive(Builder, Debug, PartialEq)]
 pub struct DirectoryDockerBuildOpts<'a> {
     /// Build arguments to use in the build.
     #[builder(setter(into, strip_option), default)]
@@ -4022,6 +4028,48 @@ impl Directory {
             query = query.arg("engineVersion", engine_version);
         }
         Module {
+            proc: self.proc.clone(),
+            selection: query,
+            graphql_client: self.graphql_client.clone(),
+        }
+    }
+    /// Creates a new file with the given contents.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Name of the file to create (e.g., "file.txt").
+    /// * `contents` - Content of the file (e.g., "Hello world!").
+    /// * `opt` - optional argument, see inner type for documentation, use <func>_opts to use
+    pub fn create_file(&self, path: impl Into<String>, contents: impl Into<String>) -> File {
+        let mut query = self.selection.select("createFile");
+        query = query.arg("path", path.into());
+        query = query.arg("contents", contents.into());
+        File {
+            proc: self.proc.clone(),
+            selection: query,
+            graphql_client: self.graphql_client.clone(),
+        }
+    }
+    /// Creates a new file with the given contents.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Name of the file to create (e.g., "file.txt").
+    /// * `contents` - Content of the file (e.g., "Hello world!").
+    /// * `opt` - optional argument, see inner type for documentation, use <func>_opts to use
+    pub fn create_file_opts(
+        &self,
+        path: impl Into<String>,
+        contents: impl Into<String>,
+        opts: DirectoryCreateFileOpts,
+    ) -> File {
+        let mut query = self.selection.select("createFile");
+        query = query.arg("path", path.into());
+        query = query.arg("contents", contents.into());
+        if let Some(permissions) = opts.permissions {
+            query = query.arg("permissions", permissions);
+        }
+        File {
             proc: self.proc.clone(),
             selection: query,
             graphql_client: self.graphql_client.clone(),

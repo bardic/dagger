@@ -29,6 +29,20 @@ class Directory extends Client\AbstractObject implements Client\IdAble
     }
 
     /**
+     * Creates a new file with the given contents.
+     */
+    public function createFile(string $path, string $contents, ?int $permissions = 420): File
+    {
+        $innerQueryBuilder = new \Dagger\Client\QueryBuilder('createFile');
+        $innerQueryBuilder->setArgument('path', $path);
+        $innerQueryBuilder->setArgument('contents', $contents);
+        if (null !== $permissions) {
+        $innerQueryBuilder->setArgument('permissions', $permissions);
+        }
+        return new \Dagger\File($this->client, $this->queryBuilderChain->chain($innerQueryBuilder));
+    }
+
+    /**
      * Gets the difference between this directory and an another directory.
      */
     public function diff(DirectoryId|Directory $other): Directory

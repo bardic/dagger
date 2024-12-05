@@ -29,6 +29,23 @@ defmodule Dagger.Directory do
     }
   end
 
+  @doc "Creates a new file with the given contents."
+  @spec create_file(t(), String.t(), String.t(), [{:permissions, integer() | nil}]) ::
+          Dagger.File.t()
+  def create_file(%__MODULE__{} = directory, path, contents, optional_args \\ []) do
+    query_builder =
+      directory.query_builder
+      |> QB.select("createFile")
+      |> QB.put_arg("path", path)
+      |> QB.put_arg("contents", contents)
+      |> QB.maybe_put_arg("permissions", optional_args[:permissions])
+
+    %Dagger.File{
+      query_builder: query_builder,
+      client: directory.client
+    }
+  end
+
   @doc "Gets the difference between this directory and an another directory."
   @spec diff(t(), Dagger.Directory.t()) :: Dagger.Directory.t()
   def diff(%__MODULE__{} = directory, other) do

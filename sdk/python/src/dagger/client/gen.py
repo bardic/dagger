@@ -2397,6 +2397,32 @@ class Directory(Type):
         _ctx = self._select("asModule", _args)
         return Module(_ctx)
 
+    def create_file(
+        self,
+        path: str,
+        contents: str,
+        *,
+        permissions: int | None = 420,
+    ) -> "File":
+        """Creates a new file with the given contents.
+
+        Parameters
+        ----------
+        path:
+            Name of the file to create (e.g., "file.txt").
+        contents:
+            Content of the file (e.g., "Hello world!").
+        permissions:
+            Permission for the file (e.g., 0600).
+        """
+        _args = [
+            Arg("path", path),
+            Arg("contents", contents),
+            Arg("permissions", permissions, 420),
+        ]
+        _ctx = self._select("createFile", _args)
+        return File(_ctx)
+
     def diff(self, other: Self) -> Self:
         """Gets the difference between this directory and an another directory.
 
