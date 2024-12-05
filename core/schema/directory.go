@@ -19,11 +19,6 @@ func (s *directorySchema) Install() {
 	dagql.Fields[*core.Query]{
 		dagql.Func("directory", s.directory).
 			Doc(`Creates an empty directory.`),
-		dagql.Func("createFile", s.createFile).
-			Doc(`Creates a new file with the given contents.`).
-			ArgDoc("path", `Name of the file to create (e.g., "file.txt").`).
-			ArgDoc("contents", `Content of the file (e.g., "Hello world!").`).
-			ArgDoc("permissions", `Permission for the file (e.g., 0600).`),
 	}.Install(s.srv)
 	dagql.Fields[*core.Directory]{
 		Syncer[*core.Directory]().
@@ -65,6 +60,11 @@ func (s *directorySchema) Install() {
 			ArgDoc("path", `Location of the written file (e.g., "/file.txt").`).
 			ArgDoc("contents", `Content of the written file (e.g., "Hello world!").`).
 			ArgDoc("permissions", `Permission given to the copied file (e.g., 0600).`),
+		dagql.Func("createFile", s.createFile).
+			Doc(`Creates a new file with the given contents.`).
+			ArgDoc("path", `Name of the file to create (e.g., "file.txt").`).
+			ArgDoc("contents", `Content of the file (e.g., "Hello world!").`).
+			ArgDoc("permissions", `Permission for the file (e.g., 0600).`),
 		dagql.Func("withoutFile", s.withoutFile).
 			Doc(`Retrieves this directory with the file at the given path removed.`).
 			ArgDoc("path", `Location of the file to remove (e.g., "/file.txt").`),
@@ -137,12 +137,16 @@ type queryFileArgs struct {
 	Permissions *int `default:"0644"`
 }
 
-func (s *directorySchema) createFile(ctx context.Context, parent *core.Query, args queryFileArgs) (*core.File, error) {
+func (s *directorySchema) createFile(ctx context.Context, parent *core.Directory, args queryFileArgs) (*core.File, error) {
 	perms := fs.FileMode(0644)
 	if args.Permissions != nil {
 		perms = fs.FileMode(*args.Permissions)
 	}
-	return core.NewFileWithContents(ctx, parent, args.Path, []byte(args.Contents), perms, nil, parent.Platform())
+	dir, err := parent.WithNewFile(ctx, args.Path, []byte(args.Contents), perms, nil)
+	if err != nil {
+		return nil, err
+	}
+	return dir.File(ctx, args.Path)
 }
 
 type directoryPipelineArgs struct {
